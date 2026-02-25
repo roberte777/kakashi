@@ -38,7 +38,7 @@
 
           # Rust toolchain with the components you actually want in a dev env.
           # rust-src is important for rust-analyzer features like "go to definition".
-          rustToolchain = pkgs.fenix.complete.withComponents [
+          rustToolchain = pkgs.fenix.stable.withComponents [
             "cargo"
             "clippy"
             "rust-src"
