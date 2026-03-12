@@ -1,7 +1,8 @@
 use std::path::{Path, PathBuf};
+use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 use anyhow::Context;
-use turso::{Builder, Connection};
+use turso::{params, Builder, Connection};
 
 pub struct DbConn {
     inner: Connection,
@@ -48,6 +49,61 @@ impl DbConn {
         }
         Ok(())
     }
+
+    /// Record a launch event for an item
+    pub async fn record_launch(&self, id: &str) -> anyhow::Result<()> {
+        // Insert or update the launchables table
+        self.inner
+            .execute(
+                "INSERT INTO launchables (id, last_launched_at)
+                 VALUES (?, CURRENT_TIMESTAMP)
+                 ON CONFLICT(id) DO UPDATE SET last_launched_at = CURRENT_TIMESTAMP",
+                params!(id),
+            )
+            .await?;
+
+        // Insert into launches table
+        self.inner
+            .execute(
+                "INSERT INTO launches (launchable_id, launched_at) VALUES (?, CURRENT_TIMESTAMP)",
+                params!(id),
+            )
+            .await?;
+
+        Ok(())
+    }
+
+    /// Get all launch timestamps for a given item ID
+    pub async fn get_launches(&self, id: &str) -> anyhow::Result<Vec<SystemTime>> {
+        let mut stmt = self
+            .inner
+            .prepare("SELECT launched_at FROM launches WHERE launchable_id = ? ORDER BY launched_at DESC")
+            .await?;
+
+        let mut rows = stmt.query(params!(id)).await?;
+
+        let mut launches = Vec::new();
+        while let Some(row) = rows.next().await? {
+            let timestamp_str: String = row.get(0)?;
+            if let Ok(timestamp) = parse_sqlite_timestamp(&timestamp_str) {
+                launches.push(timestamp);
+            }
+        }
+
+        Ok(launches)
+    }
+}
+
+/// Parse SQLite datetime string to SystemTime
+fn parse_sqlite_timestamp(s: &str) -> anyhow::Result<SystemTime> {
+    // SQLite CURRENT_TIMESTAMP format: "YYYY-MM-DD HH:MM:SS"
+    let dt = chrono::NaiveDateTime::parse_from_str(s, "%Y-%m-%d %H:%M:%S")
+        .context("Failed to parse timestamp")?;
+
+    let seconds = dt.and_utc().timestamp();
+    let nanos = dt.and_utc().timestamp_subsec_nanos();
+
+    Ok(UNIX_EPOCH + Duration::from_secs(seconds as u64) + Duration::from_nanos(nanos as u64))
 }
 
 fn db_path() -> PathBuf {

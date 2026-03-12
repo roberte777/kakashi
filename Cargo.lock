@@ -1186,6 +1186,9 @@ dependencies = [
 [[package]]
 name = "frecency"
 version = "0.1.0"
+dependencies = [
+ "async-trait",
+]
 
 [[package]]
 name = "freedesktop-file-parser"
@@ -2035,6 +2038,9 @@ name = "kakashi"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "async-trait",
+ "chrono",
+ "frecency",
  "freedesktop-file-parser",
  "iced",
  "rand 0.10.0",

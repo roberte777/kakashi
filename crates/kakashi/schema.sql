@@ -1,5 +1,5 @@
 CREATE TABLE IF NOT EXISTS launchables (
-  id TEXT PRIMARY KEY
+  id TEXT PRIMARY KEY,
   last_launched_at DATETIME
 );
 
