@@ -4,23 +4,17 @@ use freedesktop_file_parser::{DesktopFile, parse};
 
 // Sources the applications
 pub trait AppSource {
-    fn scan(&self) -> Vec<DesktopFile>;
+    fn scan(&self) -> Vec<Entry>;
 }
 
 // Provides a score for a user query
 pub trait Matcher {
-    fn score(&self, query: &str, entry: &DesktopFile) -> f64;
+    fn score(&self, query: &str, entry: &Entry) -> f64;
 }
 
 // Launches an application
 pub trait Launcher {
     fn launch(&self, entry: &DesktopFile) -> Result<(), Box<dyn Error>>;
-}
-
-// Tracks usage, used to inform score
-pub trait UsageTracker {
-    fn record_launch(&mut self, id: &str);
-    fn frecency_score(&self, id: &str) -> f64;
 }
 
 // Places to search for .desktop files, in order of least priority to highest

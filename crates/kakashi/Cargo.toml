@@ -4,6 +4,13 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+anyhow.workspace = true
+chrono.workspace = true
 freedesktop-file-parser = "0.3.1"
+frecency = { path = "../frecency" }
 iced = "0.14.0"
+tokio.workspace = true
+turso.workspace = true
+rand.workspace = true
+async-trait.workspace = true
 iced_layershell = "0.15.0"
