@@ -13,4 +13,4 @@ tokio.workspace = true
 turso.workspace = true
 rand.workspace = true
 async-trait.workspace = true
-
+iced_layershell = "0.15.0"
